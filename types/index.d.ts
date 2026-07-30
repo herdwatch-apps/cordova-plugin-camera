@@ -18,6 +18,14 @@ interface Navigator {
  */
 interface Camera {
     /**
+     * Closes the active camera or photo library picker UI.
+     * @param onSuccess Success callback, that called when stop succeeds.
+     * @param onError Error callback, that get an error message.
+     */
+    stop(
+        onSuccess: () => void,
+        onError: (message: string) => void): void;
+    /**
      * Removes intermediate photos taken by the camera from temporary storage.
      * @param onSuccess Success callback, that called when cleanup succeeds.
      * @param onError Error callback, that get an error message.

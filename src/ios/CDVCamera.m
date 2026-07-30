@@ -233,6 +233,26 @@ static NSString* MIME_JPEG    = @"image/jpeg";
     });
 }
 
+- (void)stop:(CDVInvokedUrlCommand*)command
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIViewController* presentedViewController = self.viewController.presentedViewController;
+        if (presentedViewController == nil) {
+            CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+            return;
+        }
+
+        [presentedViewController dismissViewControllerAnimated:YES completion:^{
+            self.hasPendingOperation = NO;
+            self.cdvUIImagePickerController = nil;
+
+            CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        }];
+    });
+}
+
 - (void)sendNoPermissionResult:(NSString*)callbackId
 {
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"has no access to camera"];   // error callback expects string ATM

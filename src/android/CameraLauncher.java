@@ -102,6 +102,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     private static final String IMAGE_URI_KEY = "imageUri";
 
     private static final String TAKE_PICTURE_ACTION = "takePicture";
+    private static final String STOP_ACTION = "stop";
 
     public static final int PERMISSION_DENIED_ERROR = 20;
     public static final int TAKE_PIC_SEC = 0;
@@ -146,12 +147,11 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      * @return                  A PluginResult object with a status and message.
      */
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        this.callbackContext = callbackContext;
-
         this.applicationId = cordova.getContext().getPackageName();
         this.applicationId = preferences.getString("applicationId", this.applicationId);
 
         if (action.equals(TAKE_PICTURE_ACTION)) {
+            this.callbackContext = callbackContext;
             this.srcType = CAMERA;
             this.destType = FILE_URI;
             this.saveToPhotoAlbum = false;
@@ -216,6 +216,10 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             r.setKeepCallback(true);
             callbackContext.sendPluginResult(r);
 
+            return true;
+        } else if (action.equals(STOP_ACTION)) {
+            this.stopCamera();
+            callbackContext.success();
             return true;
         }
         return false;
@@ -304,6 +308,24 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         }
         else {
             takePicture(returnType, encodingType);
+        }
+    }
+
+    /**
+     * Closes any active camera or media picker activity started by this plugin.
+     */
+    public void stopCamera() {
+        if (this.cordova == null || this.cordova.getActivity() == null) {
+            return;
+        }
+
+        int[] sourceTypes = { CAMERA, PHOTOLIBRARY, SAVEDPHOTOALBUM };
+        int[] returnTypes = { DATA_URL, FILE_URI };
+
+        for (int sourceType : sourceTypes) {
+            for (int returnType : returnTypes) {
+                this.cordova.getActivity().finishActivity((sourceType + 1) * 16 + returnType + 1);
+            }
         }
     }
 
